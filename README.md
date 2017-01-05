@@ -1,1 +1,1 @@
-![image](https://github.com/liunianyimeng/calendar/src/img.png)
+ ![image](https://raw.githubusercontent.com/liunianyimeng/calendar/master/src/img.png)
