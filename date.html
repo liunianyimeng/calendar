@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+    *{
+        margin: 0;
+        padding:0;
+    }
+
+    input {
+            height: 30px;
+            width: 326px;
+        }
+
+    .calender{
+        width:330px;
+    }
+    table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+    table th {
+                    border: 1px solid #ccc;
+             }
+    table td {
+                text-align: center;
+                border: 1px solid #ccc;
+            }
+
+    .title{
+        width:100%;
+        height: 30px;
+        line-height: 30px;
+        position: relative;
+        background: #17a4eb;
+
+
+    }
+    .title div {
+        position: absolute;
+    }
+    .prev {
+            left: 10px;
+        }
+
+    .now {
+        left: 40%;
+    }
+
+    .next {
+        right: 10px;
+    }
+
+
+    .red{
+        background-color:red;
+        
+
+
+    }
+    
+    </style>
+    <script>
+        window.onload=function(){
+            var oInput=document.getElementById("dateInput");
+            var oCalender=document.getElementById("calender");
+            var oDate=new Date();
+            var year=oDate.getFullYear();
+            var month=oDate.getMonth()+1;
+            //日历框不能重复创建
+            var flag=false;
+            //日期输入框获取焦点时，加载日历
+            oInput.onfocus=function(){
+               
+                showDate(year, month);
+            };
+           
+            //显示日历
+            function showDate(year, month){
+                if(flag==false){
+                var oTitle=document.createElement("div");//创建日历表格的表头；
+                oTitle.className="title";
+                //日历标题
+                var preM=0;
+                var nexM=0;
+                preM=month-1;
+                nexM=month+1;
+                //当月份为1月时，上一个月为12月，当月份为12月时，下一个月为1月
+                if(month==1){
+                    preM=12;
+                }else if(month==12){
+                    nexM=1;
+                }
+
+                var titleHtml='';
+                // titleHtml += '<div class="prev" id="prev"><span>';
+                // titleHtml += preM + '</span>月</div>';
+                // titleHtml += '<div class="now">';
+                // titleHtml += '<span class="span">';
+                // titleHtml += year;
+                // titleHtml += '</span>年';
+                // titleHtml += '<span class="span">' + month;
+                // titleHtml += '</span>月</div>';
+                // titleHtml += '<div class="next" id="next"><span>';
+                // titleHtml += nexM + '</span>月</div>';
+
+                titleHtml+='<div class="prev" id="prev"><span>'+preM+'</span>月</div>';
+                titleHtml+='<div class="now"><span class="span">'+year+'</span>年<span class="span">'+month+'</span>月</div>';
+                titleHtml+='<div class="next" id="next"><span>'+nexM+'</span>月</div>';
+                oTitle.innerHTML=titleHtml;
+                //将日历标题填充到日历里面
+                oCalender.appendChild(oTitle);
+                //获取日历 表头元素
+                var oSpan=oTitle.getElementsByTagName('span');
+                var prevMonth=oSpan[0];
+                var nowYear=oSpan[1];
+                var nowMonth=oSpan[2];
+                var nextMonth=oSpan[3];
+
+                //创建星期
+                var oTable=document.createElement('table');
+                var oThead=document.createElement('thead');
+                var oTr=document.createElement('tr');
+                //表头内容填充
+                var arr=['日', '一', '二', '三', '四', '五', '六'];
+                for(var i=0;i<arr.length;i++){
+                    oTh=document.createElement('th');
+                    oTh.innerHTML=arr[i];
+                    oTr.appendChild(oTh);
+                }
+                //将表头加入到日历
+                oThead.appendChild(oTr);
+                oTable.appendChild(oThead);
+                oCalender.appendChild(oTable);
+                
+                //添加当前日历的全部日期
+                //获得当前月有多少天
+                var dayNum=0;
+                if(month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12){
+                    dayNum=31;
+                }else if(month == 4 || month == 6 || month == 9 || month == 11){
+                    dayNum=30;
+                }else if(month == 2 && isLeapYear(year)){
+                    dayNum=29;
+                }else{
+                    dayNum=28;
+                };
+                //判断是否为闰年
+                function isLeapYear(year){
+                    if(year % 100 == 0 && year % 400 == 0){
+                        return true
+                    }else if(year % 100 != 0 && year % 4 == 0){
+                        return true
+                    }else{
+                        return false
+                    }
+                }
+                //创建 6行7列 日期容器
+                 var oTbody = document.createElement('tbody');
+                 for(var i=0;i<6;i++){
+                     var oTr=document.createElement('tr');
+                     for(var j=0;j<7;j++){
+                         var oTd=document.createElement('td');
+                         oTr.appendChild(oTd);
+                     }
+                     oTbody.appendChild(oTr)
+                 }
+                 oTable.appendChild(oTbody);
+
+                 //获得 1号对应的是星期几，将当月1号赋值给日期变量
+                 oDate.setFullYear(year);
+                 oDate.setMonth(month-1);
+                 oDate.setDate(1);
+                 //计算1号在第一行日期容器中的位置，依次给日期容器填充内容
+                 var week=oDate.getDay();
+                 var otds=oCalender.getElementsByTagName('td');
+                 for(var i=0;i<dayNum;i++){
+                     otds[i+week].innerHTML=i+1;
+                 }
+
+                 //让当前日期显示红色、后面的显示蓝色
+                 showColor(otds);
+                  //给左右月份绑定点击事件;
+                  monthEvent();
+                  //判断最后一行是否全为空
+                  lastTr(otds);
+                 flag = true;
+
+                  document.getElementById('calender').style.display = "block";
+
+            }
+        
+
+        };
+         //判断日期容器最后一行是否有值
+        function lastTr(otds) {
+            var flag = true;
+            for (var i = 35; i < 42; i++) {
+                if (otds[i].innerHTML != '') {
+                    flag = false;
+                }
+            }
+            //全是空的
+            if (flag) {
+                for (var i = 35; i < 42; i++) {
+                    otds[i].style.display = 'none';
+                }
+            }
+        }
+
+       //当前日期显示红色、前面的显示灰色
+
+        function showColor(otds){
+            var oDate=new Date();
+            var nowYear=oDate.getFullYear();
+            var nowMonth=oDate.getMonth();
+            var nowDay=oDate.getDate();
+
+            var oCalender=document.getElementById("calender");
+            var oSpan= oCalender.getElementsByTagName('span');
+            var contralYear=oSpan[1].innerHTML;
+            var contralMonth=oSpan[2].innerHTML;
+
+            var oIndex=0;
+            for (var i = 0; i < otds.length; i++) {
+                if (nowDay == otds[i].innerHTML && nowYear == contralYear && nowMonth + 1 == contralMonth) {
+                    otds[i].className = 'red';
+                   oIndex = i;
+                }
+            }
+        }
+        //给左右月份绑定点击事件
+         function monthEvent(){
+            var oCalendar = document.getElementById("calender");
+            var prevDiv = document.getElementById("prev");
+            var nextDiv = document.getElementById("next");
+
+            var prevMonth = prevDiv.getElementsByTagName("span");
+            var nextMonth = nextDiv.getElementsByTagName("span");
+            nextDiv.onclick=function(){
+                flag = false;
+                oCalendar.innerHTML = '';
+                showDate(year, parseInt(nextMonth[0].innerHTML));
+
+            }
+            prevDiv.onclick=function(){
+                flag = false;
+                oCalendar.innerHTML = '';
+                showDate(year, parseInt(prevMonth[0].innerHTML));
+
+            }
+
+        }
+        }  
+    </script>
+</head>
+<body>
+    <input type="text"  id="dateInput">
+    <div class="calender" id="calender" style="display: none;">
+        
+    </div>
+</body>
+</html>
